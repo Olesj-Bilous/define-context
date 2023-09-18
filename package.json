@@ -1,9 +1,13 @@
 {
   "name": "define-context",
-  "description": "define a typed react context and safely hook into its value",
+  "description": "Define and hook into a typed React Context, assured of a descriptive error message if the value was not provided.",
   "author": "Olesj Vladyslavovitsj Bilous",
   "license": "MIT",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Olesj-Bilous/define-context"
+  },
   "files": [
     "dist"
   ],

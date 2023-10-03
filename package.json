@@ -1,6 +1,7 @@
 {
   "name": "define-context",
   "description": "Define and hook into a typed React Context, assured of a descriptive error message if the value was not provided.",
+  "keywords": ["react", "context", "factory"],
   "author": "Olesj Vladyslavovitsj Bilous",
   "license": "MIT",
   "version": "1.0.1",
@@ -17,7 +18,8 @@
   "exports": {
     ".": {
       "import": "./dist/define-context.es.js",
-      "require": "./dist/define-context.umd.js"
+      "require": "./dist/define-context.umd.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "type": "module",

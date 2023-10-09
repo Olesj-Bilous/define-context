@@ -2,18 +2,18 @@
 
 Define and hook into a typed React Context, assured of a descriptive error message if the value was not provided.
 ```ts
-  const [SomeContext, useSomeContext] = defineContext<SomeContext>('Some', 'such')
+const [SomeContext, useSomeContext] = defineContext<SomeContext>('Some', 'such')
 ```
 
 The following will throw:
 ```tsx
-  const Child = () => {
-    const { someValue } = useSomeContext()
-    return <>{someValue}</>
-  }
-  render(<SomeContext.Provider value={null}>
-    <Child />
-  </SomeContext.Provider>) // Error! No such value was provided to SomeContext
+const Child = () => {
+  const { someValue } = useSomeContext()
+  return <>{someValue}</>
+}
+render(<SomeContext.Provider value={null}>
+  <Child />
+</SomeContext.Provider>) // Error! No such value was provided to SomeContext
 ```
 
 ## NEW! define reduction

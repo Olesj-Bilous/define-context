@@ -43,5 +43,18 @@ Initialize the reducer with initial state and pass a strictly typed action key t
     counter: 0
   })
   const add = dispatcher('add')
-  return <button onClick={() => add.dispatch(1)}>{counter}</button>
+  const rename = dispatcher('rename')
+  return <>
+  	<button 
+	  onClick={() => add.dispatch(1)}
+	>
+	  {counter}
+	</button>
+	<button 
+	  onClick={() => rename.dispatch('Bond, James', 1)} 
+	  disabled={counter < 1}
+	>
+	  {name}
+	</button>
+  </>
 ```

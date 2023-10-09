@@ -47,25 +47,44 @@ describe('defineReduction', () => {
         ...rest
       }
     },
-    rename(state, name: string, penalty: number) {
+    rename({ counter, ...rest }, name: string, penalty: number) {
       return {
-        ...state,
-        name: name + penalty
+        ...rest,
+        name: name,
+        counter: counter - penalty
       }
     }
   })
   const Component = () => {
-    const [{name, counter}, dispatcher] = reduction.useReduction({
+    const [{ name, counter }, dispatcher] = reduction.useReduction({
       name: 'anonymous',
       counter: 0
     })
     const add = dispatcher('add')
-    return <><label htmlFor="0">{name}</label><button id="0" onClick={() => add.dispatch(1)}>{ counter}</button></>
+    const rename = dispatcher('rename')
+    return <>
+      <label htmlFor="0">counter</label><button id="0" onClick={() => add.dispatch(1)}>{counter}</button>
+      <label htmlFor="1">name</label><input id="1" onChange={({ target: { value } }) => rename.dispatch(value, 1)} value={name} />
+    </>
   }
   it('adds', () => {
-    const rendered = render(<Component />).getByLabelText('anonymous')
-    expect(rendered.textContent).toBe("0")
-    fireEvent.click(rendered)
-    expect(rendered.textContent).toBe("1")
+    const counter = render(<Component />).getByLabelText('counter')
+    expect(counter.textContent).toBe("0")
+    fireEvent.click(counter)
+    expect(counter.textContent).toBe("1")
+  })
+  it('renames', () => {
+    const rendered = render(<Component />)
+    const name = screen.getByRole<HTMLInputElement>('textbox', {name: 'name'})
+    const counter = rendered.getByLabelText('counter')
+    expect(name.value).toBe('anonymous')
+    expect(counter.textContent).toBe("0")
+    fireEvent.change(name, {
+      target: {
+        value: 'Bond, James'
+      }
+    })
+    expect(name.value).toBe('Bond, James')
+    expect(counter.textContent).toBe("-1")
   })
 })

@@ -20,41 +20,42 @@ The following will throw:
 
 Define key-based reducers before you ever hook into them.
 ```ts
-  const reduction = defineReduction({
-    add({ counter, ...rest }: SomeState, amount: number) {
-      return {
-        counter: counter + amount,
-        ...rest
-      }
-    },
-    rename(state, name: string, penalty: number) {
-      return {
-        ...state,
-        name: name - penalty
-      }
+const reduction = defineReduction({
+  add({ counter, ...rest }: SomeState, amount: number) {
+    return {
+      ...rest,
+      counter: counter + amount
     }
-  })
+  },
+  rename({ counter, ...rest }, name: string, penalty: number) {
+    return {
+      ...rest,
+      name: name,
+  counter: counter - penalty
+    }
+  }
+})
 ```
 
 Initialize the reducer with initial state and pass a strictly typed action key to the dispatcher to dispatch typed arguments to the appropriate action.
 ```tsx
-  const [{name, counter}, dispatcher] = reduction.useReduction({
-    name: 'anonymous',
-    counter: 0
-  })
-  const add = dispatcher('add')
-  const rename = dispatcher('rename')
-  return <>
-  	<button 
-	  onClick={() => add.dispatch(1)}
-	>
-	  {counter}
-	</button>
-	<button 
-	  onClick={() => rename.dispatch('Bond, James', 1)} 
-	  disabled={counter < 1}
-	>
-	  {name}
-	</button>
-  </>
+const [{name, counter}, dispatcher] = reduction.useReduction({
+  name: 'anonymous',
+  counter: 0
+})
+const add = dispatcher('add')
+const rename = dispatcher('rename')
+return <>
+  <button 
+    onClick={() => add.dispatch(1)}
+  >
+    {counter}
+  </button>
+  <button 
+    onClick={() => rename.dispatch('Bond, James', 1)} 
+    disabled={counter < 1}
+  >
+    {name}
+  </button>
+</>
 ```

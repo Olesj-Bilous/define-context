@@ -31,7 +31,7 @@ const reduction = defineReduction({
     return {
       ...rest,
       name: name,
-  counter: counter - penalty
+      counter: counter - penalty
     }
   }
 })

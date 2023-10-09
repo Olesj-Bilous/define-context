@@ -66,15 +66,15 @@ Selectively reduce a property model to keywise value updates
 ```tsx
 const reducedModel = modelReducer<SomeState, 'id'>()
 function Component() {
-	const [{ counter, name }, dispatcher] = reducedModel.useReducer({
+  const [{ counter, name }, dispatcher] = reducedModel.useReducer({
     id: '0',
     name: 'anonymous',
     counter: 0
-	})
-	const setCounter = dispatcher('counter')
-	const setName = dispatcher('name')
-	//const setId = dispatcher('id') // 'id' not assignable
-	return <>
+  })
+  const setCounter = dispatcher('counter')
+  const setName = dispatcher('name')
+  //const setId = dispatcher('id') // 'id' not assignable
+  return <>
     <button 
       onClick={() => setCounter.dispatch(1)}
     >

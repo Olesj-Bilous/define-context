@@ -1,0 +1,11 @@
+{
+	"include": [
+		"src", "vitest.config.ts"
+	],
+	"references": [
+		{
+			"path": "./tsconfig.node.json"
+		}
+	]
+
+}

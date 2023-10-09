@@ -74,7 +74,7 @@ function Component() {
   const setCounter = dispatcher('counter')
   const setName = dispatcher('name')
   //const setId = dispatcher('id') // 'id' not assignable
-	return <>
+  return <>
     <button 
       onClick={() => setCounter.dispatch(1)}
     >

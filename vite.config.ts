@@ -6,7 +6,8 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), dts({
-    insertTypesEntry: true
+    insertTypesEntry: true,
+    exclude: path.resolve(__dirname, 'test')
   })],
   build: {
     lib: {

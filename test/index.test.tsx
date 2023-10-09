@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import defineContext, { defineReduction } from ".";
+import defineContext, { defineReduction } from "../src";
 
 interface SomeContext {
   someValue?: boolean

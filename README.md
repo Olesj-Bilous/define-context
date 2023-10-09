@@ -30,7 +30,7 @@ Define key-based reducers before you ever hook into them.
     rename(state, name: string, penalty: number) {
       return {
         ...state,
-        name: name + penalty
+        name: name - penalty
       }
     }
   })

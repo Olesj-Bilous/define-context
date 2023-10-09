@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import defineContext from ".";
+import { fireEvent, render, screen } from "@testing-library/react";
+import defineContext, { defineReduction } from ".";
 
 interface SomeContext {
   someValue?: boolean
@@ -31,5 +31,41 @@ describe('defineContext', () => {
     expect(() => render(<SomeContext.Provider value={null}>
       <Child />
     </SomeContext.Provider>)).toThrow('No some value was provided to SomeContext')
+  })
+})
+
+interface SomeState {
+  name: string
+  counter: number
+}
+
+describe('defineReduction', () => {
+  const reduction = defineReduction({
+    add({ counter, ...rest }: SomeState, amount: number) {
+      return {
+        counter: counter + amount,
+        ...rest
+      }
+    },
+    rename(state, name: string, penalty: number) {
+      return {
+        ...state,
+        name: name + penalty
+      }
+    }
+  })
+  const Component = () => {
+    const [{name, counter}, dispatcher] = reduction.useReduction({
+      name: 'anonymous',
+      counter: 0
+    })
+    const add = dispatcher('add')
+    return <><label htmlFor="0">{name}</label><button id="0" onClick={() => add.dispatch(1)}>{ counter}</button></>
+  }
+  it('adds', () => {
+    const rendered = render(<Component />).getByLabelText('anonymous')
+    expect(rendered.textContent).toBe("0")
+    fireEvent.click(rendered)
+    expect(rendered.textContent).toBe("1")
   })
 })

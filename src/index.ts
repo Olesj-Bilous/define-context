@@ -26,13 +26,18 @@ export default function defineContext<C>(
 }
 
 /**
- * A parametrised quantum of mutation that returns the mutated state
+ * A parametrised quantum of mutation that returns the mutated state.
  */
-export type Reduction<T> = (prevState: T, ...args: unknown[]) => T
+export type Reduction<T> = (prevState: T, ...args: any[]) => T
+
+/**
+ * Extracts those parameters of a function that follow the first
+ */
+export type LaterParameters<T> = T extends (...args: [first: any, ...args: infer P]) => any ? P : never
 
 type ActionKey<T, R extends Record<string, Reduction<T>>, K extends keyof R> = {
   action: K
-  args: Parameters<R[K]>
+  args: LaterParameters<R[K]>
 }
 
 /**
@@ -47,7 +52,7 @@ export function defineReduction<T, R extends Record<string, Reduction<T>>>(reduc
       const [state, dispatch] = useReducer(reducer, initState)
       function dispatcher<K extends keyof R>(action: K) {
         return {
-          dispatch(...args: Parameters<R[K]>) {
+          dispatch(...args: LaterParameters<R[K]>) {
             return dispatch({ action, args })
           }
         }

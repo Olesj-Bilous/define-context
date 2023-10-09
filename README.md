@@ -30,7 +30,7 @@ const reduction = defineReduction({
   rename({ counter, ...rest }, name: string, penalty: number) {
     return {
       ...rest,
-      name: name,
+      name,
       counter: counter - penalty
     }
   }

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import defineContext, { defineReduction } from "../src";
+import defineContext, { defineReduction, modelReducer } from "../src";
 
 interface SomeContext {
   someValue?: boolean
@@ -35,6 +35,7 @@ describe('defineContext', () => {
 })
 
 interface SomeState {
+  id: string
   name: string
   counter: number
 }
@@ -57,6 +58,7 @@ describe('defineReduction', () => {
   })
   const Component = () => {
     const [{ name, counter }, dispatcher] = reduction.useReduction({
+      id: '0',
       name: 'anonymous',
       counter: 0
     })
@@ -86,5 +88,40 @@ describe('defineReduction', () => {
     })
     expect(name.value).toBe('Bond, James')
     expect(counter.textContent).toBe("-1")
+  })
+  
+  describe('modelReducer', () => {
+    const reducedModel = modelReducer<SomeState, 'id'>()
+    const Component = () => {
+      const [{ counter, name }, dispatcher] = reducedModel.useReducer({
+        id: '0',
+        name: 'anonymous',
+        counter: 0
+      })
+      const setCounter = dispatcher('counter')
+      const setName = dispatcher('name')
+      //const setId = dispatcher('id') // not assignable
+      return <>
+        <label htmlFor="0">counter</label><button id="0" onClick={() => setCounter.dispatch(1)}>{counter}</button>
+        <label htmlFor="1">name</label><input id="1" onChange={({ target: { value } }) => setName.dispatch(value)} value={name} />
+      </>
+    }
+    it('setsCounter', () => {
+      const counter = render(<Component />).getByLabelText('counter')
+      expect(counter.textContent).toBe("0")
+      fireEvent.click(counter)
+      expect(counter.textContent).toBe("1")
+    })
+    it('setsName', () => {
+      render(<Component />)
+      const name = screen.getByRole<HTMLInputElement>('textbox', { name: 'name' })
+      expect(name.value).toBe('anonymous')
+      fireEvent.change(name, {
+        target: {
+          value: 'Bond, James'
+        }
+      })
+      expect(name.value).toBe('Bond, James')
+    })
   })
 })

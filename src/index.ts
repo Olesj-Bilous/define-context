@@ -35,7 +35,7 @@ export type Reduction<T> = (prevState: T, ...args: any[]) => T
  */
 export type LaterParameters<T> = T extends (...args: [first: any, ...args: infer P]) => any ? P : never
 
-type ActionKey<T, R extends Record<string, Reduction<T>>, K extends keyof R> = {
+interface ActionKey<T, R extends Record<string, Reduction<T>>, K extends keyof R> {
   action: K
   args: LaterParameters<R[K]>
 }
@@ -53,7 +53,38 @@ export function defineReduction<T, R extends Record<string, Reduction<T>>>(reduc
       function dispatcher<K extends keyof R>(action: K) {
         return {
           dispatch(...args: LaterParameters<R[K]>) {
-            return dispatch({ action, args })
+            dispatch({ action, args })
+          }
+        }
+      }
+      return [state, dispatcher] as [state: T, dispatcher: typeof dispatcher]
+    }
+  }
+}
+
+interface UpdateKey<T, K extends keyof T> {
+  property: K,
+  value: T[K]
+}
+
+/**
+ * Selectively reduces a property model to keywise value updates
+ */
+export function modelReducer<T extends object, X extends keyof T | '' = ''>() {
+  const reducer = <K extends Exclude<keyof T, X>>(prevModel: T, { property, value }: UpdateKey<T, K>): T => ({
+    ...prevModel,
+    [property]: value
+  })
+  return {
+    useReducer: (initModel: T) => {
+      const [state, dispatch] = useReducer(reducer, initModel)
+      function dispatcher<K extends Exclude<keyof T, X>>(property: K) {
+        return {
+          dispatch(value: T[K]) {
+            dispatch({
+              property,
+              value
+            })
           }
         }
       }

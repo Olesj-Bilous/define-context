@@ -16,7 +16,7 @@ render(<SomeContext.Provider value={null}>
 </SomeContext.Provider>) // Error! No such value was provided to SomeContext
 ```
 
-## NEW! define reduction
+## New! define reduction
 
 Define key-based reducers before you ever hook into them.
 ```ts
@@ -58,4 +58,33 @@ return <>
     {name}
   </button>
 </>
+```
+
+## Newer! modelReducer
+
+Selectively reduce a property model to keywise value updates
+```tsx
+const reducedModel = modelReducer<SomeState, 'id'>()
+function Component() {
+	const [{ counter, name }, dispatcher] = reducedModel.useReducer({
+    id: '0',
+    name: 'anonymous',
+    counter: 0
+	})
+	const setCounter = dispatcher('counter')
+	const setName = dispatcher('name')
+	//const setId = dispatcher('id') // 'id' not assignable
+	return <>
+    <button 
+      onClick={() => setCounter.dispatch(1)}
+    >
+      {counter}
+    </button>
+    <button 
+      onClick={() => setName.dispatch('Bond, James')}
+    >
+      {name}
+    </button>
+  </>
+}
 ```

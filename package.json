@@ -1,9 +1,10 @@
 {
   "name": "define-context",
-  "description": "Define and hook into a typed React Context, assured of a descriptive error message if the value was not provided.",
+  "description": "Define and hook into a typed React Context, assured of a descriptive error message if the value was not provided. Comes equipped with various reducer utilities for React useReducer.",
   "keywords": [
     "react",
     "context",
+    "reducer",
     "factory"
   ],
   "author": "Olesj Vladyslavovitsj Bilous",

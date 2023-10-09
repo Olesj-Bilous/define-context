@@ -6,7 +6,7 @@ interface SomeContext {
 }
 
 describe('defineContext', () => {
-  const [SomeContext, useSomeContext] = defineContext<SomeContext>('Some', 'some')
+  const [SomeContext, useSomeContext] = defineContext<SomeContext>('Some', 'such')
   const Child = ({ order }: { order?: string }) => {
     const { someValue } = useSomeContext()
     return <label data-testid={order}>{someValue ? 'some truthy value' : 'some falsy value'}</label>
@@ -30,7 +30,7 @@ describe('defineContext', () => {
   it('throws when no value has been provided', () => {
     expect(() => render(<SomeContext.Provider value={null}>
       <Child />
-    </SomeContext.Provider>)).toThrow('No some value was provided to SomeContext')
+    </SomeContext.Provider>)).toThrow('No such value was provided to SomeContext')
   })
 })
 

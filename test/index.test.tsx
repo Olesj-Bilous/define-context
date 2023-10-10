@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import defineContext, { defineReduction, modelReducer } from "../src";
+import defineContext, { defineReducible, modelReducer } from "../src";
 
 interface SomeContext {
   someValue?: boolean
@@ -41,7 +41,7 @@ interface SomeState {
 }
 
 describe('defineReduction', () => {
-  const reduction = defineReduction({
+  const reduction = defineReducible({
     add({ counter, ...rest }: SomeState, amount: number) {
       return {
         counter: counter + amount,
@@ -65,7 +65,7 @@ describe('defineReduction', () => {
     const add = dispatcher('add')
     const rename = dispatcher('rename')
     return <>
-      <label htmlFor="0">counter</label><button id="0" onClick={() => add.dispatch(1)}>{counter}</button>
+      <label htmlFor="0">counter</label><button id="0" onClick={() => add(1)}>{counter}</button>
       <label htmlFor="1">name</label><input id="1" onChange={({ target: { value } }) => rename.dispatch(value, 1)} value={name} />
     </>
   }

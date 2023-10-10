@@ -1,4 +1,4 @@
-import { Context, Reducer, createContext, useContext, useReducer } from "react";
+import { Context, createContext, useContext, useReducer } from "react";
 
 /**
  * Creates a `React.Context` with `defaultValue` set to `null`,
@@ -26,61 +26,24 @@ export default function defineContext<C>(
 }
 
 /**
- * A generic interface for keys passed to reducers.
+ * A parametrised quantum of mutation that returns the mutated state.
  */
-export interface ReducerKey<A, P> {
+export type Reduction<T, A extends any[] = any[]> = (prevState: T, ...args: A) => T
+
+/**
+ * Maps model property keys to a reduction that takes the corresponding property value as single argument
+ */
+export type ModelReductionMap<T> = {
+  [K in keyof T]: Reduction<T, [value: T[K]]>
+}
+
+/**
+ * A generic interface for the `action` parameter to reducers.
+ */
+export interface ReducerAction<A, P> {
   action: A
   args: P
 }
-
-/**
- * Extract action from reducer key
- */
-export type ReducerAction<K> = K extends ReducerKey<infer A, any> ? A : never
-
-/**
- * Extract args from reducer key
- */
-export type ReducerArgs<K> = K extends ReducerKey<any, infer P> ? P : never
-
-/**
- * Initialises `React.useReducer` with a reducer before using it. 
- * Wraps `dispatch: React.Dispatch` with a `dispatcher`
- * that chains an action to dispatch of appropriate parameters.
- */
-export function defineReducer<T, K extends ReducerKey<any, any>>(reducer: Reducer<T, K>) {
-  return function useDefinedReducer(initState: T) {
-    const [state, dispatch] = useReducer(reducer, initState)
-    function dispatcher<A extends ReducerAction<K>>(action: A) {
-      return function dispatchAction(args: ReducerArgs<K>) {
-        dispatch({
-          action,
-          args
-        } as K)
-      }
-    }
-    return [state, dispatcher] as [state: T, dispatcher: typeof dispatcher]
-  }
-}
-export function defineReducible<T, M, K extends keyof M>(reducer: Reducer<T, ReducerKey<K, M[K]>>) {
-  return function useDefinedReducer(initState: T) {
-    const [state, dispatch] = useReducer(reducer, initState)
-    function dispatcher<A extends K>(action: A) {
-      return function dispatchAction(args: M[K]) {
-        dispatch({
-          action,
-          args
-        })
-      }
-    }
-    return [state, dispatcher] as [state: T, dispatcher: typeof dispatcher]
-  }
-}
-
-/**
- * A parametrised quantum of mutation that returns the mutated state.
- */
-export type Reduction<T> = (prevState: T, ...args: any[]) => T
 
 /**
  * Extracts those parameters of a function that follow the first
@@ -88,44 +51,78 @@ export type Reduction<T> = (prevState: T, ...args: any[]) => T
 export type LaterParameters<T> = T extends (...args: [first: any, ...args: infer P]) => any ? P : never
 
 /**
- * A generic interface for keys passed to reduction-based reducers.
+ * A generic interface for the `action` passed to reduction-based reducers.
  */
-export interface ReductionKey<T, R extends Record<string, Reduction<T>>, K extends keyof R> extends ReducerKey<K, LaterParameters<R[K]>> {
+export interface ReductionAction<T, R extends Record<string, Reduction<T>>, K extends keyof R> extends ReducerAction<K, LaterParameters<R[K]>> {
+}
+
+/**
+ * A reducer whose actions provide a key into a reduction map as well as arguments to the corresponding reduction
+ */
+export type GenericReducer<
+  T,
+  R extends Record<string, Reduction<T>> = ModelReductionMap<T>,
+  X extends keyof R | '' = ''
+> = <K extends keyof Omit<R, X>>(prevState: T, key: ReductionAction<T, R, K>) => T
+
+/**
+ * Chains a key into a reduction map to dispatch of arguments to the corresponding reduction
+ */
+export type Dispatcher<
+  T,
+  R extends Record<string, Reduction<T>> = ModelReductionMap<T>,
+  X extends keyof R | '' = ''
+> = <K extends keyof Omit<R, X>>(action: K) => (...args: LaterParameters<R[K]>) => void
+
+/**
+ * Initialises a dispatcher-wrapped `React.useReducer` with a reduction-based reducer
+ * and allows definition of a dispatcher context
+ */
+export function defineReducer<
+  T,
+  R extends Record<string, Reduction<T>> = ModelReductionMap<T>,
+  X extends keyof R | '' = ''
+>(reducer: GenericReducer<T, R, X>) {
+  return {
+    reducer,
+    useReducer(initState: T): [state: T, dispatcher: Dispatcher<T, R, X>] {
+      const [state, dispatch] = useReducer(reducer, initState)
+      return [state, action => (...args) => dispatch({ action, args })]
+    },
+    defineContext(descriptor: string) {
+      return defineContext<Dispatcher<T, R, X>>(descriptor, 'dispatcher')
+    }
+  }
 }
 
 /**
  * Defines a reducer that keys into reductions to dispatch parametrised actions.
  */
 export function defineReduction<T, R extends Record<string, Reduction<T>>>(reductions: R) {
-  const reducer = <K extends keyof R>(prevState: T, { action, args }: ReductionKey<T, R, K>) => reductions[action](prevState, ...args)
-  return {
-    useReduction: defineReducer<T, ReductionKey<T, R, keyof R>>(reducer),
-    reducer
-  }
+  return defineReducer(
+    <K extends keyof R>(prevState: T, { action, args }: ReductionAction<T, R, K>) => reductions[action]?.(prevState, ...args) ?? prevState
+  )
 }
 
 /**
- * A generic interface for keys passed to model reducers.
+ * A generic interface for the `action` passed to model reducers.
  */
-export interface UpdateKey<T, K extends keyof T> extends ReducerKey<K, T[K]> {
+export interface UpdateAction<T, K extends keyof T> extends ReducerAction<K, [value: T[K]]> {
 }
 
 /**
- * Selectively reduces an object model to keywise property value updates
+ * Reduces an object model to keywise property value updates
  */
-export function modelReducer<T extends object, K extends keyof T>(prevModel: T, { action, args }: UpdateKey<T, K>): T {
+export function modelReducer<T extends object, K extends keyof T>(prevModel: T, { action, args: [value] }: UpdateAction<T, K>): T {
   return {
     ...prevModel,
-    [action]: args
+    [action]: value
   }
 }
 
 /**
- * Define a model reducer 
+ * Define a model reducer, optionally restricting some property keys
  */
 export function reduceModel<T extends object, X extends keyof T | '' = ''>() {
-  return {
-    useReducer: defineReducer<T, UpdateKey<T, Exclude<keyof T, X>>>(modelReducer),
-    reducer: modelReducer as <K extends Exclude<keyof T, X>>(prevModel: T, key: UpdateKey<T, K>) => T
-  }
+  return defineReducer<T, ModelReductionMap<T>, X>(modelReducer)
 }

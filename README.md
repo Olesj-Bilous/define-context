@@ -16,7 +16,7 @@ render(<SomeContext.Provider value={null}>
 </SomeContext.Provider>) // Error! No such value was provided to SomeContext
 ```
 
-## New! define reduction
+## define reduction
 
 Define key-based reducers before you ever hook into them.
 ```ts
@@ -38,33 +38,28 @@ const reduction = defineReduction({
 ```
 
 Initialize the reducer with initial state and pass a strictly typed action key to the dispatcher to dispatch typed arguments to the appropriate action.
-```tsx
-const [{name, counter}, dispatcher] = reduction.useReduction({
+```jsx
+const [{name, counter}, dispatcher] = reduction.useReducer({
   name: 'anonymous',
   counter: 0
 })
 const add = dispatcher('add')
 const rename = dispatcher('rename')
 return <>
-  <button 
-    onClick={() => add.dispatch(1)}
-  >
+  <button onClick={() => add(1)}>
     {counter}
   </button>
-  <button 
-    onClick={() => rename.dispatch('Bond, James', 1)} 
-    disabled={counter < 1}
-  >
+  <button onClick={() => rename('Bond, James', 1)} disabled={counter < 1}>
     {name}
   </button>
 </>
 ```
 
-## Newer! modelReducer
+## reduce model
 
-Selectively reduce a property model to keywise value updates
-```tsx
-const reducedModel = modelReducer<SomeState, 'id'>()
+Selectively reduces an object model to keywise property value updates
+```jsx
+const reducedModel = reduceModel<SomeState, 'id'>()
 function Component() {
   const [{ counter, name }, dispatcher] = reducedModel.useReducer({
     id: '0',
@@ -75,14 +70,10 @@ function Component() {
   const setName = dispatcher('name')
   //const setId = dispatcher('id') // 'id' not assignable
   return <>
-    <button 
-      onClick={() => setCounter.dispatch(1)}
-    >
+    <button onClick={() => setCounter(1)}>
       {counter}
     </button>
-    <button 
-      onClick={() => setName.dispatch('Bond, James')}
-    >
+    <button onClick={() => setName('Bond, James')}>
       {name}
     </button>
   </>

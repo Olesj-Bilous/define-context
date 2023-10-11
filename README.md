@@ -11,6 +11,7 @@ const Child = () => {
   const { someValue } = useSomeContext()
   return <>{someValue}</>
 }
+
 render(<SomeContext.Provider value={null}>
   <Child />
 </SomeContext.Provider>) // Error! No such value was provided to SomeContext
@@ -39,12 +40,14 @@ const reduction = defineReduction({
 
 Initialize the reducer with initial state and pass a strictly typed action key to the dispatcher to dispatch typed arguments to the appropriate action.
 ```jsx
-const [{name, counter}, dispatcher] = reduction.useReducer({
+const [{ name, counter }, dispatcher] = reduction.useReducer({
   name: 'anonymous',
   counter: 0
 })
+
 const add = dispatcher('add')
 const rename = dispatcher('rename')
+
 return <>
   <button onClick={() => add(1)}>
     {counter}
@@ -57,13 +60,17 @@ return <>
 
 You can easily define a provider and hooks.
 ```jsx
-const {Provider, useDispatcher, useStateContext} = reduction.defineProvider('Some')
+const { Provider, useStateContext, useDispatcher} = reduction.defineProvider('Some')
+
 const Child = () => {
+  const { name }= useStateContext()
   const dispatcher = useDispatcher()
-  const {name}= useStateContext()
+
   const rename = dispatcher('rename')
+
   return <button onClick={() => rename('Chiffre, Le', 3)}>{name}</button>
 }
+
 const ProviderComponent = () => {
   return <Provider initState={{
     id: '0',
@@ -80,15 +87,18 @@ const ProviderComponent = () => {
 Selectively reduces an object model to keywise property value updates.
 ```jsx
 const reducedModel = reduceModel<SomeState, 'id'>()
+
 function Component() {
   const [{ counter, name }, dispatcher] = reducedModel.useReducer({
     id: '0',
     name: 'anonymous',
     counter: 0
   })
+
   const setCounter = dispatcher('counter')
   const setName = dispatcher('name')
   //const setId = dispatcher('id') // 'id' not assignable
+  
   return <>
     <button onClick={() => setCounter(1)}>
       {counter}

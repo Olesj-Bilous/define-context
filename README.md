@@ -55,29 +55,29 @@ return <>
 </>
 ```
 
-You can easily define a dispatcher context.
+You can easily define a provider and hooks.
 ```jsx
-const [SomeDispatcherContext, useSomeDispatcher] = reduction.defineContext('Some')
+const {Provider, useDispatcher, useStateContext} = reduction.defineProvider('Some')
 const Child = () => {
-  const dispatcher = useSomeDispatcher()
+  const dispatcher = useDispatcher()
+  const {name}= useStateContext()
   const rename = dispatcher('rename')
-  return <button onClick={() => rename('Chiffre, Le', 1)}>Au revoir, monsieur Bond</button>
+  return <button onClick={() => rename('Chiffre, Le', 3)}>{name}</button>
 }
-const Provider = () => {
-  const [{ name }, dispatcher] = reduction.useReducer({
+const ProviderComponent = () => {
+  return <Provider initState={{
+    id: '0',
     name: 'Bond, James',
-    counter: 0
-  })
-  return <SomeDispatcherContext.Provider value={dispatcher}>
-    {name}
+    counter: 4
+  }}>
     <Child />
-  </SomeDispatcherContext.Provider>
+  </Provider>
 }
 ```
 
 ## reduce model
 
-Selectively reduces an object model to keywise property value updates
+Selectively reduces an object model to keywise property value updates.
 ```jsx
 const reducedModel = reduceModel<SomeState, 'id'>()
 function Component() {

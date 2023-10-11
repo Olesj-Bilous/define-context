@@ -92,31 +92,30 @@ describe('defineReduction', () => {
     expect(counter.textContent).toBe("-1")
   })
   
-  const [SomeDispatcherContext, useSomeDispatcher] = reduction.defineContext('Some')
+  const {Provider, useDispatcher, useStateContext} = reduction.defineProvider('Some')
   const Child = () => {
-    const dispatcher = useSomeDispatcher()
+    const dispatcher = useDispatcher()
+    const {name}= useStateContext()
     const rename = dispatcher('rename')
     return <>
-      <label htmlFor="0">au revoir</label>
-      <button id="0" onClick={() => rename('Chiffre, Le', 3)}></button>
+      <label htmlFor="0">name</label>
+      <button id="0" onClick={() => rename('Chiffre, Le', 3)}>{name}</button>
     </>
   }
-  const Provider = () => {
-    const [{ name }, dispatcher] = reduction.useReducer({
+  const ProviderComponent = () => {
+    return <Provider initState={{
       id: '0',
       name: 'Bond, James',
       counter: 4
-    })
-    return <SomeDispatcherContext.Provider value={dispatcher}>
-      <span data-testid="0">{name}</span>
+    }}>
       <Child />
-    </SomeDispatcherContext.Provider>
+    </Provider>
   }
   it('passes dispatcher down through defined context', () => {
-    const rendered = render(<Provider />)
-    const name = rendered.getByTestId('0')
+    const rendered = render(<ProviderComponent />)
+    const name = rendered.getByLabelText('name')
     expect(name.textContent).toBe('Bond, James')
-    fireEvent.click(rendered.getByLabelText('au revoir'))
+    fireEvent.click(name)
     expect(name.textContent).toBe('Chiffre, Le')
   })
 })

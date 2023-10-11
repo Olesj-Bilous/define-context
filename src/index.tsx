@@ -78,7 +78,11 @@ export function defineReducer<
           </DispatcherContext.Provider>
         </StateContext.Provider>
       }
-      return Provider
+      return {
+        Provider,
+        useStateContext,
+        useDispatcher
+      }
     }
   }
 }

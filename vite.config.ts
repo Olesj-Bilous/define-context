@@ -11,7 +11,7 @@ export default defineConfig({
   })],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: path.resolve(__dirname, 'src/index.tsx'),
       name: 'define-context',
       formats: ['es', 'umd'],
       fileName: format => `define-context.${format}.js`

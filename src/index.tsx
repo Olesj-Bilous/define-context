@@ -70,7 +70,7 @@ export function defineReducer<
     defineProvider(descriptor: string) {
       const [StateContext, useReducerState] = defineContext<T>(descriptor, 'state')
       const [DispatcherContext, useDispatcher] = defineContext<Dispatcher<R, X>>(descriptor, 'dispatcher')
-      function Provider({ initState, children }: { initState: T, children?: ReactNode }) {
+      function Provider({ initState, children }: { initState: T, children?: ReactNode }): JSX.Element {
         const [state, dispatcher] = useDefinedReducer(initState)
         return <StateContext.Provider value={state}>
           <DispatcherContext.Provider value={dispatcher}>

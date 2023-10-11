@@ -55,6 +55,26 @@ return <>
 </>
 ```
 
+You can easily define a dispatcher context.
+```jsx
+const [SomeDispatcherContext, useSomeDispatcher] = reduction.defineContext('Some')
+const Child = () => {
+  const dispatcher = useSomeDispatcher()
+  const rename = dispatcher('rename')
+  return <button onClick={() => rename('Chiffre, Le', 1)}>Au revoir, monsieur Bond</button>
+}
+const Provider = () => {
+  const [{ name }, dispatcher] = reduction.useReducer({
+    name: 'Bond, James',
+    counter: 0
+  })
+  return <SomeDispatcherContext.Provider value={dispatcher}>
+    {name}
+    <Child />
+  </SomeDispatcherContext.Provider>
+}
+```
+
 ## reduce model
 
 Selectively reduces an object model to keywise property value updates

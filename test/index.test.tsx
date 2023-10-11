@@ -97,7 +97,7 @@ describe('defineReduction', () => {
     const dispatcher = useSomeDispatcher()
     const rename = dispatcher('rename')
     return <>
-      <label htmlFor="0">bonjour</label>
+      <label htmlFor="0">au revoir</label>
       <button id="0" onClick={() => rename('Chiffre, Le', 3)}></button>
     </>
   }
@@ -116,7 +116,7 @@ describe('defineReduction', () => {
     const rendered = render(<Provider />)
     const name = rendered.getByTestId('0')
     expect(name.textContent).toBe('Bond, James')
-    fireEvent.click(rendered.getByLabelText('bonjour'))
+    fireEvent.click(rendered.getByLabelText('au revoir'))
     expect(name.textContent).toBe('Chiffre, Le')
   })
 })

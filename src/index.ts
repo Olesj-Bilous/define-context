@@ -75,7 +75,7 @@ export function defineReducer<
 /**
  * A parametrised update quantum that should return the updated state immutably.
  */
-export type Reduction<T, A extends any[] = any[]> = (prevState: T, ...args: A) => T
+export type Reduction<T, A extends any[] = any[]> = (prevState: Readonly<T>, ...args: A) => T
 
 /**
  * Extracts those parameters of a function that follow the first

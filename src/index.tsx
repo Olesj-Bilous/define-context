@@ -68,7 +68,7 @@ export function defineReducer<
     reducer,
     useReducer: useDefinedReducer,
     defineProvider(descriptor: string) {
-      const [StateContext, useStateContext] = defineContext<T>(descriptor, 'state')
+      const [StateContext, useReducerState] = defineContext<T>(descriptor, 'state')
       const [DispatcherContext, useDispatcher] = defineContext<Dispatcher<R, X>>(descriptor, 'dispatcher')
       function Provider({ initState, children }: { initState: T, children?: ReactNode }) {
         const [state, dispatcher] = useDefinedReducer(initState)
@@ -80,7 +80,7 @@ export function defineReducer<
       }
       return {
         Provider,
-        useStateContext,
+        useReducerState,
         useDispatcher
       }
     }

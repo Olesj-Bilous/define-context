@@ -58,12 +58,12 @@ return <>
 </>
 ```
 
-You can easily define a provider and hooks.
+You can easily define a provider and hooks reducer state and dispatcher.
 ```jsx
-const { Provider, useStateContext, useDispatcher } = reduction.defineProvider('Some')
+const { Provider, useReducerState, useDispatcher } = reduction.defineProvider('Some')
 
 const Child = () => {
-  const { name } = useStateContext()
+  const { name } = useReducerState()
   const dispatcher = useDispatcher()
 
   const rename = dispatcher('rename')

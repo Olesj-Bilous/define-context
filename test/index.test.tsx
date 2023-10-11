@@ -92,10 +92,10 @@ describe('defineReduction', () => {
     expect(counter.textContent).toBe("-1")
   })
   
-  const {Provider, useDispatcher, useStateContext} = reduction.defineProvider('Some')
+  const {Provider, useDispatcher, useReducerState} = reduction.defineProvider('Some')
   const Child = () => {
     const dispatcher = useDispatcher()
-    const {name}= useStateContext()
+    const {name}= useReducerState()
     const rename = dispatcher('rename')
     return <>
       <label htmlFor="0">name</label>

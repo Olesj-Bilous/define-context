@@ -60,7 +60,7 @@ return <>
 
 You can easily define a provider and hooks.
 ```jsx
-const { Provider, useStateContext, useDispatcher} = reduction.defineProvider('Some')
+const { Provider, useStateContext, useDispatcher } = reduction.defineProvider('Some')
 
 const Child = () => {
   const { name } = useStateContext()

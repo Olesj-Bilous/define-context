@@ -63,7 +63,7 @@ You can easily define a provider and hooks.
 const { Provider, useStateContext, useDispatcher} = reduction.defineProvider('Some')
 
 const Child = () => {
-  const { name }= useStateContext()
+  const { name } = useStateContext()
   const dispatcher = useDispatcher()
 
   const rename = dispatcher('rename')
@@ -98,7 +98,7 @@ function Component() {
   const setCounter = dispatcher('counter')
   const setName = dispatcher('name')
   //const setId = dispatcher('id') // 'id' not assignable
-  
+
   return <>
     <button onClick={() => setCounter(1)}>
       {counter}

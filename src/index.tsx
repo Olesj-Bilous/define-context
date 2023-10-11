@@ -1,4 +1,4 @@
-import { Context, createContext, useContext, useReducer } from "react";
+import { Context, ReactNode, createContext, useContext, useReducer } from "react";
 
 /**
  * Creates a `React.Context` with `defaultValue` set to `null`,
@@ -60,14 +60,25 @@ export function defineReducer<
   R extends Record<string, any[]> = Record<string, any[]>,
   X extends keyof R | '' = ''
 >(reducer: GenericReducer<T, R, X>) {
+  function useDefinedReducer(initState: T): [state: T, dispatcher: Dispatcher<R, X>] {
+    const [state, dispatch] = useReducer(reducer, initState)
+    return [state, action => (...args) => dispatch({ action, args })]
+  }
   return {
     reducer,
-    useReducer(initState: T): [state: T, dispatcher: Dispatcher<R, X>] {
-      const [state, dispatch] = useReducer(reducer, initState)
-      return [state, action => (...args) => dispatch({ action, args })]
-    },
-    defineContext(descriptor: string) {
-      return defineContext<Dispatcher<R, X>>(descriptor, 'dispatcher')
+    useReducer: useDefinedReducer,
+    defineProvider(descriptor: string) {
+      const [StateContext, useStateContext] = defineContext<T>(descriptor, 'state')
+      const [DispatcherContext, useDispatcher] = defineContext<Dispatcher<R, X>>(descriptor, 'dispatcher')
+      function Provider({ initState, children }: { initState: T, children?: ReactNode }) {
+        const [state, dispatcher] = useDefinedReducer(initState)
+        return <StateContext.Provider value={state}>
+          <DispatcherContext.Provider value={dispatcher}>
+            {children}
+          </DispatcherContext.Provider>
+        </StateContext.Provider>
+      }
+      return Provider
     }
   }
 }

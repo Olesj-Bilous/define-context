@@ -40,13 +40,14 @@ const reduction = defineReduction({
 
 Initialize the reducer with initial state and pass a strictly typed action key to the dispatcher to dispatch typed arguments to the appropriate action.
 ```jsx
+// dispatcher(action: "add" | "rename"): (...args: [amount: number] | [name: string, penalty: number]) => void
 const [{ name, counter }, dispatcher] = reduction.useReducer({
   name: 'anonymous',
   counter: 0
 })
 
-const add = dispatcher('add')
-const rename = dispatcher('rename')
+const add = dispatcher('add') // <"add">(action: "add") => (amount: number) => void
+const rename = dispatcher('rename') // <"rename">(action: "rename") => (name: string, penalty: number) => void
 
 return <>
   <button onClick={() => add(1)}>
@@ -58,7 +59,7 @@ return <>
 </>
 ```
 
-You can easily define a provider and hooks into reducer state and dispatcher.
+You can easily define a provider and hooks into reducer state and dispatcher for its children.
 ```jsx
 const { Provider, useReducerState, useDispatcher } = reduction.defineProvider('Some')
 
@@ -95,8 +96,8 @@ function Component() {
     counter: 0
   })
 
-  const setCounter = dispatcher('counter')
-  const setName = dispatcher('name')
+  const setCounter = dispatcher('counter') // <"counter">(action: "counter") => (arg: number) => void
+  const setName = dispatcher('name') // <"name">(action: "name") => (arg: string) => void
   //const setId = dispatcher('id') // 'id' not assignable
 
   return <>

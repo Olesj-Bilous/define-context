@@ -5,7 +5,7 @@ import { Context, ReactNode, createContext, useContext, useReducer } from "react
  * and a hook into the context that throws a descriptive error
  * if `value` passed to `Context.Provider` is `null | undefined`.
  */
-export default function defineContext<C>(
+export function defineContext<C>(
   descriptor: string,
   valueDescriptor?: string
 ): [
@@ -160,6 +160,8 @@ export function defineProvider<T, D>(descriptor: string, useDefinedReducer: (ini
   }
   return {
     Provider,
+    StateContext,
+    DispatcherContext,
     useReducerState,
     useDispatcher
   }

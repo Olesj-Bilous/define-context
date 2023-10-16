@@ -131,14 +131,18 @@ describe('defineReduction', () => {
       name: 'anonymous',
       counter: 0
     })
+
     const add = dispatcher('add')
     const rename = dispatcher('rename')
+
     return <ReductionUser {...{ name, counter, add, rename }} />
   }
+
   it('adds', () => adds(Component))
   it('renames', () => renames(Component))
 
   const { Provider, useDispatcher, useReducerState } = reduction.defineProvider('Some')
+
   const Child = () => {
     const dispatcher = useDispatcher()
     const { name } = useReducerState()
@@ -148,6 +152,7 @@ describe('defineReduction', () => {
       <button id="0" onClick={() => rename('Chiffre, Le', 3)}>{name}</button>
     </>
   }
+
   const ProviderComponent = () => {
     return <Provider initState={{
       id: '0',
@@ -157,6 +162,7 @@ describe('defineReduction', () => {
       <Child />
     </Provider>
   }
+
   it('passes dispatcher down through defined context', () => {
     const rendered = render(<ProviderComponent />)
     const name = rendered.getByLabelText('name')
@@ -175,9 +181,11 @@ describe('reduceModel', () => {
       name: 'anonymous',
       counter: 0
     })
+
     const setCounter = dispatcher('counter')
     const setName = dispatcher('name')
     //const setId = dispatcher('id') // not assignable
+    
     return <ModelUser {...{ counter, name, setCounter, setName }} />
   }
   

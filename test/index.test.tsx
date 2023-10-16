@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { fireEvent, render, screen } from "@testing-library/react";
-import defineContext, { defineModelHub, defineReduction, reduceModel } from "../src";
+import { defineContext, defineModelHub, defineReduction, reduceModel } from "../src";
 
 interface SomeContext {
   someValue?: boolean

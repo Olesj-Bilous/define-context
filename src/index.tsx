@@ -57,10 +57,25 @@ export interface ReducerHubAction<
  * A reducer whose actions provide a key into a virtual args record along with a correspondingly typed args array.
  */
 export interface GenericReducer<
-  T,
-  R extends Record<string, any[]>
+  R extends Record<string, any[]>,
+  M = any
 > {
-  <K extends keyof R>(
+  <
+    T extends M,
+    K extends keyof R
+  >(
+    prevState: Readonly<T>,
+    action: ReducerAction<R, K>
+  ): T
+}
+
+export interface TypedReducer<
+  R extends Record<string, any[]>,
+  T
+> {
+  <
+    K extends keyof R
+  >(
     prevState: Readonly<T>,
     action: ReducerAction<R, K>
   ): T
@@ -70,8 +85,22 @@ export interface GenericReducer<
  * A reducer that acts as a hub between multiple reducers.
  */
 export interface ReducerHub<
-  T,
-  R extends Record<string, Record<string, any[]>>
+  R extends Record<string, Record<string, any[]>>,
+  M = any
+> {
+  <
+    T extends M,
+    K extends keyof R,
+    L extends keyof R[K]
+  >(
+    prevState: Readonly<T>,
+    action: ReducerHubAction<R, K, L>
+  ): T
+}
+
+export interface TypedHub<
+  R extends Record<string, Record<string, any[]>>,
+  T
 > {
   <
     K extends keyof R,
@@ -108,11 +137,11 @@ export interface DispatcherHub<
  * and enables definition of a provider.
  */
 export function defineReducer<
-  T,
-  R extends Record<string, any[]>
->(reducer: GenericReducer<T, R>) {
-  function useDefinedReducer(initState: T): [state: T, dispatcher: Dispatcher<R>] {
-    const [state, dispatch] = useReducer(reducer, initState)
+  R extends Record<string, any[]>,
+  M = any
+>(reducer: GenericReducer<R, M>) {
+  function useDefinedReducer<T extends M>(initState: T): [state: T, dispatcher: Dispatcher<R>] {
+    const [state, dispatch] = useReducer<TypedReducer<R, T>>(reducer, initState)
     return [state, (action) => (...args) => dispatch({ action, args })]
   }
   return {
@@ -128,11 +157,11 @@ export function defineReducer<
  * Defines a hub-based reducer hook.
  */
 export function defineReducerHub<
-  T,
-  R extends Record<string, Record<string, any[]>>
->(reducer: ReducerHub<T, R>) {
-  function useReducerHub(initState: T): [state: T, dispatcher: DispatcherHub<R>] {
-    const [state, dispatch] = useReducer(reducer, initState)
+  R extends Record<string, Record<string, any[]>>,
+  M = any
+>(reducer: ReducerHub<R, M>) {
+  function useReducerHub<T extends M>(initState: T): [state: T, dispatcher: DispatcherHub<R>] {
+    const [state, dispatch] = useReducer<TypedHub<R, T>>(reducer, initState)
     return [state, (reducer) => (action) => (...args) => dispatch({ reducer, action, args })]
   }
   return {
@@ -147,10 +176,10 @@ export function defineReducerHub<
 /**
  * Defines a provider for a particular reducer hook.
  */
-export function defineProvider<T, D>(descriptor: string, useDefinedReducer: (initState: T) => [state: T, dispatcher: D]) {
-  const [StateContext, useReducerState] = defineContext<T>(descriptor, 'state')
+export function defineProvider<D, M = any>(descriptor: string, useDefinedReducer: <T extends M>(initState: T) => [state: T, dispatcher: D]) {
+  const [StateContext, useReducerState] = defineContext<M>(descriptor, 'state')
   const [DispatcherContext, useDispatcher] = defineContext<D>(descriptor, 'dispatcher')
-  function Provider({ initState, children }: { initState: T, children?: ReactNode }): JSX.Element {
+  function Provider<T extends M>({ initState, children }: { initState: T, children?: ReactNode }): JSX.Element {
     const [state, dispatcher] = useDefinedReducer(initState)
     return <StateContext.Provider value={state}>
       <DispatcherContext.Provider value={dispatcher}>
@@ -170,7 +199,7 @@ export function defineProvider<T, D>(descriptor: string, useDefinedReducer: (ini
 /**
  * A parametrised update quantum that should return the immutably updated state.
  */
-export type Reduction<T, A extends any[]> = (prevState: Readonly<T>, ...args: A) => T
+export type Reduction<A extends any[], M = any> = <T extends M>(prevState: Readonly<T>, ...args: A) => T
 
 /**
  * Extracts those parameters of a function that follow the first.
@@ -192,10 +221,13 @@ export type ReductionAction<R, K extends keyof R> = ReducerAction<LaterParameter
 /**
  * Defines a reducer that keys into `reductions` to dispatch parametrised actions.
  */
-export function defineReduction<T, R extends Record<string, Reduction<T, any[]>>>(reductions: R) {
+export function defineReduction<R extends Record<string, Reduction<any[], M>>, M = any>(reductions: R) {
   return {
     ...defineReducer(
-      <K extends keyof R>(
+      <
+        T extends M,
+        K extends keyof R
+      >(
         prevState: Readonly<T>,
         { action, args }: ReductionAction<R, K>
       ): T => reductions[action]?.(prevState, ...args) ?? prevState
@@ -240,19 +272,21 @@ export interface ConstrainedUpdate<T, X extends keyof T | '' = ''> {
 /**
  * Define a model reducer, optionally omitting some property keys.
  */
-export function reduceModel<T extends object, X extends keyof T | '' = ''>() {
-  return defineReducer<T, SingleArgMap<Omit<T, X>>>(modelReducer as ConstrainedUpdate<T, X>)
-}
+/*export function reduceModel<T extends object, X extends keyof T | '' = ''>() {
+  return defineReducer<SingleArgMap<Omit<T, X>>, T>(modelReducer as ConstrainedUpdate<T, X>)
+}*/
 
 /**
  * Fuse a record of generic reducers into a hub.
  */
-export function fuseReducers<T,
-  R extends Record<string, Record<string, any[]>>
+export function fuseReducers<
+  R extends Record<string, Record<string, any[]>>,
+  M = any
 >(reducers: {
-  [K in keyof R]: GenericReducer<T, R[K]>
-}): ReducerHub<T, R> {
+  [K in keyof R]: GenericReducer<R[K], M>
+}): ReducerHub<R, M> {
   return function reducer<
+    T extends M,
     K extends keyof R,
     L extends keyof R[K]
   >(
@@ -267,28 +301,27 @@ export function fuseReducers<T,
  * Fuse a model into a hub with a custom reduction-based reducer.
  */
 export function enhanceModel<
-  T,
-  R extends Record<string, Reduction<T, any[]>>
+  R extends Record<string, Reduction<any[], M>>,
+  M = any
 >(reductions: R) {
-  return <X extends keyof T | '' = ''>() => {
-    return fuseReducers<T, {
-      model: SingleArgMap<Omit<T, X>>;
-      action: LaterParametersMap<R>;
-    }>({
-      model: modelReducer as ConstrainedUpdate<T, X>,
-      action: defineReduction<T, R>(reductions).reducer
-    })
-  }
+  return fuseReducers<{
+    model: SingleArgMap<M>,
+    action: LaterParametersMap<R>
+  }>({
+    model: modelReducer,
+    action: defineReduction<R, M>(reductions).reducer
+  })
 }
 
 /**
  * Define a hook into a reducer hub based on a reduction-enhanced model.
  */
 export function defineModelHub<
-  T,
-  R extends Record<string, Reduction<T, any[]>>
+  R extends Record<string, Reduction<any[], M>>,
+  M = any
 >(reductions: R) {
-  return <X extends keyof T | '' = ''>() => {
-    return defineReducerHub(enhanceModel<T, R>(reductions)<X>())
-  }
+  return defineReducerHub<{
+    model: SingleArgMap<M>;
+    action: LaterParametersMap<R>;
+  }, M>(enhanceModel<R, M>(reductions))
 }
